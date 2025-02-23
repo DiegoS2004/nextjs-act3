@@ -1,101 +1,231 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  // Estados para el contador
+  const [counter, setCounter] = useState(10);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // Estados para el formulario de registro
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [registerError, setRegisterError] = useState('');
+
+  // Estados para el formulario de login
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  // Estado para alternar entre "Registrarse" e "Iniciar sesion"
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Validacion del correo electronico
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  // Validacion de la contrasena
+  const validatePassword = (password: string) => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return password.length >= 8 && hasUpperCase && hasSpecialChar;
+  };
+
+  // Efecto para validar la contrasena en el registro
+  useEffect(() => {
+    if (registerPassword && !validatePassword(registerPassword)) {
+      setRegisterError(
+        'La contrasena debe tener al menos 8 caracteres, una mayuscula y un caracter especial.'
+      );
+    } else if (
+      registerConfirmPassword &&
+      registerPassword !== registerConfirmPassword
+    ) {
+      setRegisterError('Las contrasenas no coinciden.');
+    } else {
+      setRegisterError('');
+    }
+  }, [registerPassword, registerConfirmPassword]);
+
+  // Efecto para validar el correo en el login
+  useEffect(() => {
+    if (loginEmail && !validateEmail(loginEmail)) {
+      setLoginError('Correo electronico no valido');
+    } else {
+      setLoginError('');
+    }
+  }, [loginEmail]);
+
+  // Manejar el envio del formulario de registro
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registerName || !registerEmail || !registerPassword || !registerConfirmPassword) {
+      setRegisterError('Todos los campos son requeridos.');
+      return;
+    }
+    if (!validateEmail(registerEmail)) {
+      setRegisterError('Correo electronico no valido.');
+      return;
+    }
+    if (!validatePassword(registerPassword)) {
+      setRegisterError(
+        'La contrasena debe tener al menos 8 caracteres, una mayuscula y un caracter especial.'
+      );
+      return;
+    }
+    if (registerPassword !== registerConfirmPassword) {
+      setRegisterError('Las contrasenas no coinciden.');
+      return;
+    }
+    alert(`Registro exitoso: ${registerName}`);
+  };
+
+  // Manejar el envio del formulario de login
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateEmail(loginEmail)) {
+      setLoginError('Correo electronico no valido');
+      return;
+    }
+    if (!loginPassword) {
+      setLoginError('La contrasena es requerida');
+      return;
+    }
+    alert(`Login exitoso: ${loginEmail}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-blue-600 text-white py-4 text-center">
+        <h1 className="text-3xl font-bold">Actividad 2 - Diego Sabillon A01798446</h1>
+      </header>
+
+      <div className="container mx-auto px-4 mt-8">
+        <div className="text-center mb-8">
+          <button
+            onClick={() => setShowLogin(!showLogin)}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {showLogin ? '¿No tienes cuenta? Registrate' : '¿Ya tienes cuenta? Inicia sesion'}
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {!showLogin ? (
+          <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Registro</h2>
+            <form onSubmit={handleRegisterSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Nombre:</label>
+                <input
+                  type="text"
+                  value={registerName}
+                  onChange={(e) => setRegisterName(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Correo electronico:</label>
+                <input
+                  type="email"
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Contrasena:</label>
+                <input
+                  type="password"
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Confirmar contrasena:</label>
+                <input
+                  type="password"
+                  value={registerConfirmPassword}
+                  onChange={(e) => setRegisterConfirmPassword(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              {registerError && <p className="text-red-500 text-sm">{registerError}</p>}
+              <button
+                type="submit"
+                className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Registrarse
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Iniciar sesion</h2>
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Correo electronico:</label>
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Contrasena:</label>
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Iniciar sesion
+              </button>
+            </form>
+          </div>
+        )}
+
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto mt-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Counter</h2>
+          <p className="text-4xl font-bold text-center mb-4">{counter}</p>
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => setCounter(counter + 1)}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Increment
+            </button>
+            <button
+              onClick={() => setCounter(counter - 1)}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              Decrement
+            </button>
+            <button
+              onClick={() => setCounter(0)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
